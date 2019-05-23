@@ -1,3 +1,4 @@
+[![Board Status](https://dev.azure.com/rhaug001/06544674-0442-42f2-bbb7-52055b1de938/4c9f229a-7793-424e-9169-3f8f8d7f5626/_apis/work/boardbadge/bf08c44b-56a4-4b5b-b664-1d443e20b210)](https://dev.azure.com/rhaug001/06544674-0442-42f2-bbb7-52055b1de938/_boards/board/t/4c9f229a-7793-424e-9169-3f8f8d7f5626/Microsoft.RequirementCategory)
 [![Build Status](https://dev.azure.com/appdev-gbb/kubernetes-hackfest/_apis/build/status/dstrebel.kubernetes-hackfest)](https://dev.azure.com/appdev-gbb/kubernetes-hackfest/_build/latest?definitionId=2)
 
 ## Prerequisites 
