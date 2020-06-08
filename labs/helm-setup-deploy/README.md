@@ -4,6 +4,7 @@ In this lab we will setup Helm in our AKS cluster and deploy our application wit
 
 ## Prerequisites
 
+* Helm Version 3+
 * Clone this repo in Azure Cloud Shell.
 * Complete previous labs:
     * [Azure Kubernetes Service](../create-aks-cluster/README.md)
@@ -11,29 +12,15 @@ In this lab we will setup Helm in our AKS cluster and deploy our application wit
 
 ## Instructions
 
-1. Initialize Helm
+>Note: The following lab assumes Helm version 3. Run the following to confirm your Helm version:
+```bash
+helm version
 
-    Helm helps you manage Kubernetes applications — Helm Charts helps you define, install, and upgrade even the most complex Kubernetes application. Helm has a CLI component and a server side component called Tiller. 
-    * Initialize Helm and Tiller:
+# Example Output:
+version.BuildInfo{Version:"v3.0.0", GitCommit:"e29ce2a54e96cd02ccfce88bee4f58bb6e2a28b6", GitTreeState:"clean", GoVersion:"go1.13.4"}
+```
 
-        ```bash
-        kubectl apply -f ~/kubernetes-hackfest/labs/helm-setup-deploy/rbac-config.yaml
-        helm init --service-account tiller --upgrade
-        ```
-
-    * Validate the install (the Helm version may be newer in your lab):
-        ```bash
-        helm version
-        ```
-
-        ```bash
-        Client: &version.Version{SemVer:"v2.12.1", GitCommit:"20adb27c7c5868466912eebdf6664e7390ebe710", GitTreeState:"clean"}
-        Server: &version.Version{SemVer:"v2.12.2", GitCommit:"20adb27c7c5868466912eebdf6664e7390ebe710", GitTreeState:"clean"}
-        ```
-
-        > Note: It can take a minute or so for Tiller to start
-
-2. Review the Helm Chart components
+1. Review the Helm Chart components
 
     In this repo, there is a folder for `charts` with a sub-folder for each specific app chart. In our case each application has its own chart. 
 
@@ -41,7 +28,7 @@ In this lab we will setup Helm in our AKS cluster and deploy our application wit
 
     The `templates` folder holds the yaml files for the specific kubernetes resources for our application. Here you will see how Helm inserts the parameters into resources with this bracketed notation: eg -  `{{.Values.deploy.image}}`
 
-3. Customize Chart Parameters
+1. Customize Chart Parameters
 
     In each chart we will need to update the values file with our specific Azure Container Registry. 
 
@@ -84,11 +71,11 @@ In this lab we will setup Helm in our AKS cluster and deploy our application wit
         containerPort: 3009
         ```
 
-    * Valdiate that the `imageTag` parameter matches the tag you created in Azure Container Registry in the previous lab.
+    * Validate that the `imageTag` parameter matches the tag you created in Azure Container Registry in the previous lab.
 
     * Add `imagePullSecret` to each deployment.yaml file for each microservice
 
-        **NOTE: Only do iIf the Service Principal role assignment in Build Application lab failed. You will need to add the Docker Registry secret that was created to each deployment via a mechanism called an imagePullSecret.**
+        **NOTE: Only do if the Service Principal role assignment in Build Application lab failed. You will need to add the Docker Registry secret that was created to each deployment via a mechanism called an imagePullSecret.**
 
         [charts/service-tracker-ui/templates/deployment.yaml](../../charts/service-tracker-ui/templates/deployment.yaml)
 
@@ -124,7 +111,7 @@ In this lab we will setup Helm in our AKS cluster and deploy our application wit
         ...
         ```
 
-4. Deploy Charts
+1. Deploy Charts
 
     Ensure namespace was created earlier:
     ```bash
@@ -139,34 +126,33 @@ In this lab we will setup Helm in our AKS cluster and deploy our application wit
     ```bash
     # Application charts
 
-    helm upgrade --install data-api ~/kubernetes-hackfest/charts/data-api --namespace hackfest
-    helm upgrade --install quakes-api ~/kubernetes-hackfest/charts/quakes-api --namespace hackfest
-    helm upgrade --install weather-api ~/kubernetes-hackfest/charts/weather-api --namespace hackfest
-    helm upgrade --install flights-api ~/kubernetes-hackfest/charts/flights-api --namespace hackfest
-    helm upgrade --install service-tracker-ui ~/kubernetes-hackfest/charts/service-tracker-ui --namespace hackfest
+    helm upgrade --install data-api charts/data-api --namespace hackfest
+    helm upgrade --install quakes-api charts/quakes-api --namespace hackfest
+    helm upgrade --install weather-api charts/weather-api --namespace hackfest
+    helm upgrade --install flights-api charts/flights-api --namespace hackfest
+    helm upgrade --install service-tracker-ui charts/service-tracker-ui --namespace hackfest
     ```
 
-5. Initialize application
+1. Initialize application
 
     * First check to see if pods and services are working correctly
 
     ```bash
     kubectl get pod,svc -n hackfest
 
-    NAME                                      READY     STATUS    RESTARTS   AGE
-    pod/data-api-555688c8d-xb76d              1/1       Running   0          1m
-    pod/flights-api-69b9d9dfc-8b9z8           1/1       Running   0          1m
-    pod/quakes-api-7d95bccfc8-5x9hw           1/1       Running   0          1m
-    pod/service-tracker-ui-7db967b8c9-p27s5   1/1       Running   0          54s
-    pod/weather-api-7448ff75b7-7bptj          1/1       Running   0          1m
+    NAME                                     READY   STATUS    RESTARTS   AGE
+    pod/data-api-5bdc5c94b4-8xfq2            1/1     Running   3          5d3h
+    pod/flights-api-77f77464df-n7jb4         1/1     Running   4          5d15h
+    pod/quakes-api-7c8b96b594-vm5qd          1/1     Running   4          5d15h
+    pod/service-tracker-ui-c4476d778-hpn5q   1/1     Running   3          5d6h
+    pod/weather-api-56d6c57b89-cds8v         1/1     Running   4          5d15h
 
-    NAME                         TYPE           CLUSTER-IP     EXTERNAL-IP    PORT(S)          AGE
-    service/data-api             LoadBalancer   10.0.89.66     <none>         3009:31779/TCP   9m
-    service/flights-api          LoadBalancer   10.0.210.195   <none>         3003:30862/TCP   8m
-    service/kubernetes           ClusterIP      10.0.0.1       <none>         443/TCP          20h
-    service/quakes-api           LoadBalancer   10.0.134.0     <none>         3003:31950/TCP   8m
-    service/service-tracker-ui   LoadBalancer   10.0.90.157    23.96.11.115   8080:32324/TCP   8m
-    service/weather-api          LoadBalancer   10.0.179.66    <none>         3003:31951/TCP   8m
+    NAME                         TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+    service/data-api             ClusterIP      10.0.179.206   <none>        3009/TCP         7d4h
+    service/flights-api          ClusterIP      10.0.255.59    <none>        3003/TCP         7d4h
+    service/quakes-api           ClusterIP      10.0.122.46    <none>        3012/TCP         7d4h
+    service/service-tracker-ui   LoadBalancer   10.0.24.184    40.71.20.1    8080:30757/TCP   5d6h
+    service/weather-api          ClusterIP      10.0.124.80    <none>        3015/TCP         7d4h
     ```
 
     * Browse to the web UI
@@ -174,11 +160,11 @@ In this lab we will setup Helm in our AKS cluster and deploy our application wit
     ```bash
     kubectl get service service-tracker-ui -n hackfest
 
-    NAME                TYPE           CLUSTER-IP   EXTERNAL-IP     PORT(S)          AGE
-    service-tracker-ui  LoadBalancer   10.0.82.74   23.96.11.115    8080:31346/TCP   8m
+    NAME                 TYPE           CLUSTER-IP    EXTERNAL-IP   PORT(S)          AGE
+    service-tracker-ui   LoadBalancer   10.0.24.184   40.71.20.1    8080:30757/TCP   5d6h
     ```
 
-    Open the browser to http://23.96.11.115:8080 (your IP will be different #obvious)
+    Open the browser to http://40.71.20.1:8080 (your IP will be different #obvious)
 
     * You will need to click "REFRESH DATA" for each service to load the data sets.
 

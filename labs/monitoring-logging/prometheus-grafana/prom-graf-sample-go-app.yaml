@@ -1,9 +1,12 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: sample-go
 spec:
   replicas: 2
+  selector:
+    matchLabels:
+      app: sample-go
   template:
     metadata:
       labels:
@@ -12,7 +15,7 @@ spec:
     spec:
       containers:
       - name: sample-go
-        image: khacr.azurecr.io/sample-goweb:v1
+        image: chzbrgr71/sample-go:v1
         ports:
         - name: web
           containerPort: 8080
@@ -35,6 +38,7 @@ metadata:
 spec:
   selector:
     app: sample-go
+  type: LoadBalancer    
   ports:
   - name: web
     port: 8080
